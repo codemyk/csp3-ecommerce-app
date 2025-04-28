@@ -88,30 +88,62 @@ const AdminDashboard = () => {
 
   const toggleAvailability = async (product) => {
     try {
+      // Optimistically update the UI to reflect the change
+      const updatedProduct = { ...product, isActive: !product.isActive };
+      setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
+
+      // Then, make the API request
       const token = localStorage.getItem('token');
-      const endpoint = product.isActive ? 'archive' : 'activate';
-      await fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${product._id}/${endpoint}`, {
+      const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
+      const response = await fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${product._id}/${endpoint}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchProducts();
-      triggerSuccess(product.isActive ? 'Product disabled successfully!' : 'Product activated successfully!');
+
+      const data = await response.json();
+
+      // Check if the request was successful, if not, revert the change
+      if (!response.ok) {
+        throw new Error('Failed to update product availability');
+      }
+
+      // Trigger success message
+      triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
     } catch (error) {
       console.error('Error toggling availability:', error);
+      // If there was an error, revert the UI change
+      triggerError('Failed to update product availability');
     }
   };
 
   const fetchOrders = async () => {
+    console.log('Fetching orders...');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://monhod8wi7.execute-api.us-west-2.amazonaws.com/production/orders/all-orders', {
+      const response = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/orders/all-orders', {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       const data = await response.json();
-      setOrders(data.orders);
-      setShowOrdersModal(true);
+      console.log('Full response:', data); // Check the full response
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+
+      // Now access the Orders array correctly:
+      if (data.Orders && Array.isArray(data.Orders)) {
+        console.log('Fetched Orders:', data.Orders); // Log orders for verification
+        setOrders(data.Orders); // Set orders to the state
+      } else {
+        console.error('Unknown orders response format:', data);
+        setOrders([]); // Fallback in case of unexpected format
+      }
+
+      setShowOrdersModal(true); // Show the modal after orders are fetched
     } catch (error) {
       console.error('Error fetching orders:', error);
+      triggerError('Failed to fetch orders!');
     }
   };
 
@@ -142,43 +174,55 @@ const AdminDashboard = () => {
         <Button variant="secondary" onClick={fetchOrders}>Show User Orders</Button>
       </div>
 
-      <table className="table table-striped text-center align-middle">
-        <thead className="table-dark">
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Availability</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.length > 0 ? (
-            products.map(product => (
-              <tr key={product._id}>
-                <td>{product.name}</td>
-                <td>{product.description}</td>
-                <td>₱{product.price}</td>
-                <td>{product.isActive ? 'Available' : 'Unavailable'}</td>
-                <td className="d-flex justify-content-center">
-                  <Button variant="primary" size="sm" className="me-2" onClick={() => { setSelectedProduct(product); setShowEditModal(true); }}>Edit</Button>
-                  <Button
-                    variant={product.isActive ? "danger" : "success"}
-                    size="sm"
-                    onClick={() => toggleAvailability(product)}
-                  >
-                    {product.isActive ? 'Disable' : 'Activate'}
-                  </Button>
-                </td>
-              </tr>
-            ))
-          ) : (
+      <div className="table-responsive">
+        <table className="table table-striped text-center align-middle">
+          <thead className="table-dark">
             <tr>
-              <td colSpan="5">No products available.</td>
+              <th style={{ minWidth: '120px' }}>Name</th>
+              <th style={{ maxWidth: '250px', wordBreak: 'break-word' }}>Description</th>
+              <th style={{ minWidth: '80px' }}>Price</th>
+              <th style={{ minWidth: '100px' }}>Availability</th>
+              <th style={{ minWidth: '150px' }}>Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {products.length > 0 ? (
+              products.map(product => (
+                <tr key={product._id}>
+                  <td style={{ wordBreak: 'break-word' }}>{product.name}</td>
+                  <td style={{ wordBreak: 'break-word', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {product.description}
+                  </td>
+                  <td>₱{product.price}</td>
+                  <td>{product.isActive ? 'Available' : 'Unavailable'}</td>
+                  <td className="text-center">
+                    <div className="d-inline-flex justify-content-center align-items-center gap-2">
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        onClick={() => { setSelectedProduct(product); setShowEditModal(true); }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant={product.isActive ? "danger" : "success"}
+                        size="sm"
+                        onClick={() => toggleAvailability(product)}
+                      >
+                        {product.isActive ? 'Disable' : 'Activate'}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">No products available.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
@@ -241,14 +285,19 @@ const AdminDashboard = () => {
       <Modal show={showOrdersModal} onHide={() => setShowOrdersModal(false)}>
         <Modal.Header closeButton><Modal.Title>User Orders</Modal.Title></Modal.Header>
         <Modal.Body>
-          {orders.length > 0 ? orders.map((order, index) => (
-            <div key={index} className="mb-3">
-              <p><strong>Order ID:</strong> {order._id}</p>
-              <p><strong>Total Price:</strong> ₱{order.totalPrice}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-              <hr />
-            </div>
-          )) : <p>No orders found.</p>}
+          {orders.length > 0 ? (
+            orders.map((order, index) => (
+              <div key={index} className="mb-3">
+                <p><strong>Order ID:</strong> {order._id}</p>
+                <p><strong>Total Price:</strong> ₱{order.totalPrice}</p>
+                <p><strong>Status:</strong> {order.status}</p>
+                {/* Optionally loop over order.products if available */}
+                <hr />
+              </div>
+            ))
+          ) : (
+            <p>No orders found.</p>
+          )}
         </Modal.Body>
       </Modal>
     </div>

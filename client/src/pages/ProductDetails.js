@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, Spinner, InputGroup, FormControl, Card, Toast, ToastContainer } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProductDetails() {
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [subtotal, setSubtotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${productId}`, {
@@ -33,8 +36,18 @@ export default function ProductDetails() {
         });
     }, [productId]);
 
-    const increaseQuantity = () => setQuantity(prev => prev + 1);
-    const decreaseQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+    const handleQuantityChange = (action) => {
+        let newQuantity = quantity;
+        if (action === 'increment') {
+            newQuantity = quantity + 1;
+        } else if (action === 'decrement' && quantity > 1) {
+            newQuantity = quantity - 1;
+        }
+        setQuantity(newQuantity);
+        if (product) {
+            setSubtotal(newQuantity * product.price);
+        }
+    };
 
     const handleAddToCart = async () => {
         try {
@@ -47,7 +60,8 @@ export default function ProductDetails() {
                 },
                 body: JSON.stringify({
                     productId: product._id,
-                    quantity
+                    quantity,
+                    price: product.price
                 })
             });
 
@@ -68,12 +82,22 @@ export default function ProductDetails() {
 
             const cartData = await cartResponse.json();
 
-            // ✅ Calculate total items in cart
-            const totalItems = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
+            // Ensure cartData.cartItems is defined and is an array
+            if (Array.isArray(cartData.cartItems)) {
+                // ✅ Calculate total items in cart
+                const totalItems = cartData.cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-            // ✅ Set success toast message
-            setToastMessage(`Item added! Cart now has ${totalItems} item${totalItems > 1 ? 's' : ''}.`);
-            setShowToast(true);
+                // ✅ Set success toast message
+                setToastMessage(`Item added! Cart now has ${totalItems} item${totalItems > 1 ? 's' : ''}.`);
+                setShowToast(true);
+
+                // Wait for 1 second before navigating
+                setTimeout(() => {
+                    navigate('/products');
+                }, 1000); // Delay for 1 second (1000ms)
+            } else {
+                throw new Error('Invalid cart data received.');
+            }
 
         } catch (error) {
             console.error(error);
@@ -95,8 +119,6 @@ export default function ProductDetails() {
         return <h1>Error: {error}</h1>;
     }
 
-    const subtotal = product.price * quantity;
-
     return (
         <div className="d-flex justify-content-center my-5">
             <Card style={{ width: '30rem' }} className="shadow p-4">
@@ -113,7 +135,7 @@ export default function ProductDetails() {
 
                     <div className="d-flex align-items-center my-3">
                         <span className="me-2"><strong>Quantity:</strong></span>
-                        <Button variant="secondary" onClick={decreaseQuantity}>-</Button>
+                        <Button variant="secondary" onClick={() => handleQuantityChange('decrement')}>-</Button>
                         <FormControl
                             type="text"
                             value={quantity}
@@ -121,7 +143,7 @@ export default function ProductDetails() {
                             className="text-center mx-2"
                             style={{ width: '60px' }}
                         />
-                        <Button variant="secondary" onClick={increaseQuantity}>+</Button>
+                        <Button variant="secondary" onClick={() => handleQuantityChange('increment')}>+</Button>
                     </div>
 
                     {/* Subtotal */}

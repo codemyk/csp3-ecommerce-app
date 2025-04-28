@@ -10,8 +10,10 @@ import Logout from './pages/Logout';
 import Register from './pages/Register';
 import ProductCatalog from './pages/ProductCatalog';
 import AdminDashboard from './pages/AdminDashboard';
+import Cart from './pages/Cart';
 import { UserProvider } from './UserContext';
 import ProductDetails from './pages/ProductDetails';
+import CheckOut from './pages/CheckOut';
 import './App.css';
 
 function App() {
@@ -70,7 +72,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/cart" element={<Cart />} />
             <Route path="/product/:productId" element={<ProductDetails />} />
+            <Route path="/checkout" element={<CheckOut />} />
             <Route path="*" element={<Error />} />
           </Routes>
         </Container>
