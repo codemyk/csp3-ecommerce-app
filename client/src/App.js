@@ -14,6 +14,9 @@ import Cart from './pages/Cart';
 import { UserProvider } from './UserContext';
 import ProductDetails from './pages/ProductDetails';
 import CheckOut from './pages/CheckOut';
+import Profile from './pages/Profile';
+import SetAsAdmin from './pages/SetAsAdmin';
+import OrderHistory from './pages/OrderHistory';
 import './App.css';
 
 function App() {
@@ -74,7 +77,10 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/product/:productId" element={<ProductDetails />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/checkout" element={<CheckOut />} />
+            <Route path="/set-as-admin" element={<SetAsAdmin />} />
+            <Route path="/my-orders" element={<OrderHistory />} />
             <Route path="*" element={<Error />} />
           </Routes>
         </Container>

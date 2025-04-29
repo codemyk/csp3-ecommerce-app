@@ -1,3 +1,40 @@
-.card {
-  min-height: 40vh;
+/* App.css */
+
+/* Make sure all product cards have consistent height */
+.product-card {
+    height: 100%; /* Ensure full height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Optional: Ensure the button is always at the bottom of the card */
+.product-card .mt-auto {
+    margin-top: auto;
+}
+
+/* Optional: Add hover effect for cards */
+.product-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.home-centered {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+}
+
+.home-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.home-logo {
+    width: 120px;
+    margin-bottom: 1rem;
+    opacity: 0.95;
 }

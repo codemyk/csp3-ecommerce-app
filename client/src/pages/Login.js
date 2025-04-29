@@ -91,39 +91,44 @@ export default function Login() {
   }
 
   return (
-    <Form onSubmit={authenticate}>
-      <h1 className="my-5 text-center">Login</h1>
-      <Form.Group controlId="userEmail">
-        <Form.Label>Email address</Form.Label>
-        <Form.Control
-          type="email"
-          placeholder="Enter email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </Form.Group>
+    <div className="d-flex flex-column align-items-center justify-content-start min-vh-100 pt-5 bg-light">
+      <div className="container w-50 bg-white p-4 rounded shadow">
+        <Form onSubmit={authenticate}>
+          <h1 className="my-4 text-center">Login</h1>
 
-      <Form.Group controlId="password" className="mt-2 mb-2">
-        <Form.Label>Password</Form.Label>
-        <Form.Control
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </Form.Group>
+          <Form.Group controlId="userEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </Form.Group>
 
-      {isActive ? (
-        <Button variant="primary" type="submit" id="submitBtn">
-          Submit
-        </Button>
-      ) : (
-        <Button variant="danger" type="submit" id="submitBtn" disabled>
-          Submit
-        </Button>
-      )}
-    </Form>
+          <Form.Group controlId="password" className="mt-2 mb-3">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          {isActive ? (
+            <Button variant="primary" type="submit" id="submitBtn" className="w-100">
+              Submit
+            </Button>
+          ) : (
+            <Button variant="danger" type="submit" id="submitBtn" className="w-100" disabled>
+              Submit
+            </Button>
+          )}
+        </Form>
+      </div>
+    </div>
   );
 }

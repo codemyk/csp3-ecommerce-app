@@ -193,7 +193,7 @@ const AdminDashboard = () => {
                   <td style={{ wordBreak: 'break-word', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {product.description}
                   </td>
-                  <td>₱{product.price}</td>
+                  <td>₱{product.price.toFixed(2)}</td>
                   <td>{product.isActive ? 'Available' : 'Unavailable'}</td>
                   <td className="text-center">
                     <div className="d-inline-flex justify-content-center align-items-center gap-2">

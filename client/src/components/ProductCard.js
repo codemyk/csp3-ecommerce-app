@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function ProductCard({ product }) {
     return (
-        <div className="product-card p-4 border rounded shadow">
+        <div className="product-card p-4 border rounded shadow d-flex flex-column" style={{ height: '100%' }}>
             {/* Product Name in primary color */}
             <h3 className="text-primary">{product.name}</h3>
 
@@ -14,9 +14,11 @@ export default function ProductCard({ product }) {
             <p className="text-warning"><strong>₱{product.price.toFixed(2)}</strong></p>
 
             {/* Details button */}
-            <Link to={`/product/${product._id}`}>
-                <Button variant="primary">Details</Button>
-            </Link>
+            <div className="mt-auto">
+                <Link to={`/product/${product._id}`}>
+                    <Button variant="primary" className="w-100">Details</Button>
+                </Link>
+            </div>
         </div>
     );
 }
