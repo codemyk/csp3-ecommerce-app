@@ -42,7 +42,7 @@ const AdminDashboard = () => {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/all', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/all`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
   const handleAddProduct = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products', {
+      await fetch(`${process.env.REACT_APP_API_BASE_URL}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(newProduct)
@@ -73,7 +73,7 @@ const AdminDashboard = () => {
   const handleEditProduct = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${selectedProduct._id}/update`, {
+      await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${selectedProduct._id}/update`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(selectedProduct)
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
       // Then, make the API request
       const token = localStorage.getItem('token');
       const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
-      const response = await fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${product._id}/${endpoint}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -120,7 +120,7 @@ const AdminDashboard = () => {
     console.log('Fetching orders...');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/orders/all-orders', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/all-orders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

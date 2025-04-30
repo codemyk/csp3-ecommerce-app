@@ -16,7 +16,7 @@ export default function OrderHistoryPage() {
       }
 
       const response = await fetch(
-        `https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${productId}`,
+        `${process.env.REACT_APP_API_BASE_URL}/products/${productId}`,
         {
           method: "GET",
           headers: {
@@ -48,7 +48,7 @@ export default function OrderHistoryPage() {
     async function fetchOrders() {
       try {
         const response = await fetch(
-          "https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/orders/my-orders/",
+          `${process.env.REACT_APP_API_BASE_URL}/orders/my-orders/`,
           {
             method: "GET",
             headers: {

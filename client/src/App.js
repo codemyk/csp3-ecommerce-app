@@ -34,7 +34,7 @@ function App() {
     const token = localStorage.getItem('token');
 
     if (token) {
-      fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/users/details`, {
+      fetch(`${process.env.REACT_APP_API_BASE_URL}/users/details`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -60,7 +60,7 @@ function App() {
         unsetUser();
       });
     }
-  }, []);
+  }, [user]);
 
   return (
     <UserProvider value={{ user, setUser, unsetUser }}>

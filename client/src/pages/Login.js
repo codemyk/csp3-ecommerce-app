@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Navigate } from 'react-router-dom'; 
 import Swal from 'sweetalert2';
 import UserContext from '../UserContext';
@@ -13,8 +13,8 @@ export default function Login() {
 
   const authenticate = (e) => {
     e.preventDefault();
-    // Attempt to log the user in
-    fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/users/login/', {
+
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/users/login/`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -24,9 +24,7 @@ export default function Login() {
     .then((res) => res.json())
     .then((data) => {
       if (data.access) {
-        // Save the token to localStorage
         localStorage.setItem('token', data.access);
-        // Retrieve the user details after login
         retrieveUserDetails(data.access);
 
         Swal.fire({
@@ -35,7 +33,6 @@ export default function Login() {
           text: "Welcome to Generix Drugstore!",
         });
       } else {
-        // Show error if the login failed
         Swal.fire({
           title: "Authentication failed",
           icon: "error",
@@ -52,14 +49,12 @@ export default function Login() {
       });
     });
 
-    // Clear the form fields after attempting login
     setEmail('');
     setPassword('');
   };
 
-  // Retrieve user details after successful login
   const retrieveUserDetails = (token) => {
-    fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/users/details', {
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/users/details`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -77,58 +72,55 @@ export default function Login() {
   };
 
   useEffect(() => {
-    // Validation to enable submit button when all fields are populated and both passwords match
-    if (email !== '' && password !== '') {
-      setIsActive(true);
-    } else {
-      setIsActive(false);
-    }
+    setIsActive(email !== '' && password !== '');
   }, [email, password]);
 
   if (user && user.id) {
-    // If the user is logged in, redirect to the products page
     return <Navigate to="/home" />;
   }
 
   return (
-    <div className="d-flex flex-column align-items-center justify-content-start min-vh-100 pt-5 bg-light">
-      <div className="container w-50 bg-white p-4 rounded shadow">
-        <Form onSubmit={authenticate}>
-          <h1 className="my-4 text-center">Login</h1>
+    <Container fluid className="min-vh-80 d-flex align-items-center justify-content-center bg-light py-5">
+      <Row className="w-100 justify-content-center">
+        <Col xs={12} sm={10} md={8} lg={5} xl={4}>
+          <div className="bg-white p-4 p-sm-5 rounded shadow">
+            <Form onSubmit={authenticate}>
+              <h1 className="mb-4 text-center">Login</h1>
 
-          <Form.Group controlId="userEmail">
-            <Form.Label>Email address</Form.Label>
-            <Form.Control
-              type="email"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </Form.Group>
+              <Form.Group controlId="userEmail">
+                <Form.Label>Email address</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Form.Group>
 
-          <Form.Group controlId="password" className="mt-2 mb-3">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </Form.Group>
+              <Form.Group controlId="password" className="mt-3 mb-4">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </Form.Group>
 
-          {isActive ? (
-            <Button variant="primary" type="submit" id="submitBtn" className="w-100">
-              Submit
-            </Button>
-          ) : (
-            <Button variant="danger" type="submit" id="submitBtn" className="w-100" disabled>
-              Submit
-            </Button>
-          )}
-        </Form>
-      </div>
-    </div>
+              <Button 
+                variant={isActive ? "primary" : "danger"} 
+                type="submit" 
+                className="w-100" 
+                disabled={!isActive}
+              >
+                Submit
+              </Button>
+            </Form>
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }

@@ -17,7 +17,7 @@ export default function Products() {
     setLoading(true);
     setError(null);
 
-    fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/active', {
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/products/active`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

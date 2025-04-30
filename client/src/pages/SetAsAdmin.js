@@ -13,7 +13,7 @@ export default function SetAsAdminPage() {
 
     try {
       const response = await fetch(
-        `https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/users/${userId}/set-as-admin`,
+        `${process.env.REACT_APP_API_BASE_URL}/users/${userId}/set-as-admin`,
         {
           method: "PATCH",
           headers: {

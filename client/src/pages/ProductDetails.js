@@ -15,7 +15,7 @@ export default function ProductDetails() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/${productId}`, {
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${productId}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
@@ -52,7 +52,7 @@ export default function ProductDetails() {
     const handleAddToCart = async () => {
         try {
             // Add the item to the cart
-            const addToCartResponse = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/cart/add-to-cart/', {
+            const addToCartResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/cart/add-to-cart/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export default function ProductDetails() {
             }
 
             // ✅ Now fetch the updated cart
-            const cartResponse = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/cart/get-cart/', {
+            const cartResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/cart/get-cart/`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }

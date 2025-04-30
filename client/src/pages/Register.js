@@ -36,7 +36,7 @@ export default function Register() {
 	const registerUser = (e) => {
 		e.preventDefault();
 
-		fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/users/register/', {
+		fetch(`${process.env.REACT_APP_API_BASE_URL}/users/register/`, {
 			method: 'POST',
 			headers: {
 				"Content-Type": "application/json"

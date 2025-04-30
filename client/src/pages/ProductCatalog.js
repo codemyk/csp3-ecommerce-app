@@ -6,7 +6,7 @@ export default function ProductCatalog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/products/active')
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/products/active`)
       .then(res => res.json())
       .then(data => {
         setProducts(data.products);

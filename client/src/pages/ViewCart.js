@@ -9,7 +9,7 @@ export default function ViewCart() {
 
     const fetchCart = async () => {
         try {
-            const response = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/cart/get-cart', {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/cart/get-cart`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
@@ -31,7 +31,7 @@ export default function ViewCart() {
 
     const handleRemoveItem = async (productId) => {
         try {
-            const response = await fetch(`https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/cart/${productId}/remove-from-cart`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/cart/${productId}/remove-from-cart`, {
                 method: 'PATCH',
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -54,7 +54,7 @@ export default function ViewCart() {
         if (!window.confirm('Are you sure you want to clear the cart?')) return;
 
         try {
-            const response = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/cart/clear-cart', {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/cart/clear-cart`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -80,7 +80,7 @@ export default function ViewCart() {
         }
 
         try {
-            const response = await fetch('https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/cart/update-cart-quantity', {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/cart/update-cart-quantity`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

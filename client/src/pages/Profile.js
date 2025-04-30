@@ -12,7 +12,7 @@ export default function ProfilePage() {
     async function fetchUser() {
       try {
         const response = await fetch(
-          "https://vyi3ev2j8b.execute-api.us-west-2.amazonaws.com/production/users/details",
+          `${process.env.REACT_APP_API_BASE_URL}/users/details`,
           {
             method: "GET",
             headers: {
