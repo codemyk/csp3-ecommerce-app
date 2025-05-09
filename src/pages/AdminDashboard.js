@@ -87,38 +87,38 @@ const AdminDashboard = () => {
   };
 
   const toggleAvailability = async (product) => {
+  const newStatus = !product.isActive;
+  const updatedProduct = { ...product, isActive: newStatus };
+
+  // Optimistic update
+  setProducts(prev =>
+    prev.map(p => (p._id === product._id ? updatedProduct : p))
+  );
+
   try {
-    const newStatus = !product.isActive;
-    const updatedProduct = { ...product, isActive: newStatus };
-
-    // 1. Optimistic UI update
-    setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
-    console.log(`Setting UI to ${newStatus ? 'Available' : 'Unavailable'}`);
-
-    // 2. Call API
     const token = localStorage.getItem('token');
     const endpoint = product.isActive ? 'archive' : 'activate';
-    console.log(`Calling endpoint: /products/${product._id}/${endpoint}`);
-
     const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` }
     });
 
     const data = await response.json();
-    console.log('Response from server:', data);
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to update');
     }
 
-    // 3. Show success and reload data
     triggerSuccess(newStatus ? 'Product activated successfully!' : 'Product disabled successfully!');
-    fetchProducts();
   } catch (error) {
-    console.error('Toggle error:', error);
+    console.error('Toggle failed:', error);
+
+    // Revert the change
+    setProducts(prev =>
+      prev.map(p => (p._id === product._id ? product : p))
+    );
+
     triggerError('Failed to update product availability');
-    fetchProducts(); // Revert UI if failure
   }
 };
 
