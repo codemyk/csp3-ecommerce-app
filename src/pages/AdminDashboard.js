@@ -87,29 +87,35 @@ const AdminDashboard = () => {
   };
 
   const toggleAvailability = async (product) => {
-    try {
-      const updatedProduct = { ...product, isActive: !product.isActive };
-      setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
+  try {
+    // Optimistically update the UI to reflect the change
+    const updatedProduct = { ...product, isActive: !product.isActive };
+    setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
 
-      const token = localStorage.getItem('token');
-      const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    // Then, make the API request to update the availability
+    const token = localStorage.getItem('token');
+    const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to update product availability');
-      }
-
-      fetchProducts();
-
-      triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
-    } catch (error) {
-      console.error('Error toggling availability:', error);
-      triggerError('Failed to update product availability');
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error('Failed to update product availability');
     }
-  };
+
+    // Trigger success message
+    triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
+
+    // Refetch the products after the successful update
+    fetchProducts(); // Make sure to refetch the products after the update
+  } catch (error) {
+    console.error('Error toggling availability:', error);
+    // If there was an error, revert the UI change
+    triggerError('Failed to update product availability');
+  }
+};
 
   const fetchOrders = async () => {
     console.log('Fetching orders...');
