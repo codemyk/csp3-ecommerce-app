@@ -13,6 +13,7 @@ const AdminDashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [toastType, setToastType] = useState('success');
 
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -37,6 +38,7 @@ const AdminDashboard = () => {
     }, 1000);
   };
 
+
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -46,8 +48,8 @@ const AdminDashboard = () => {
       const data = await response.json();
       setProducts(data);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      triggerError('Failed to fetch products!');
+      console.error('Error adding product:', error);
+      triggerError('Failed to add product!');
     }
   };
 
@@ -85,17 +87,14 @@ const AdminDashboard = () => {
   };
 
   const toggleAvailability = async (product) => {
-    const newStatus = product.status === 'active' ? 'archived' : 'active';
-    const updatedProduct = { ...product, status: newStatus };
-
-    // Optimistic update
-    setProducts(prev =>
-      prev.map(p => (p._id === product._id ? updatedProduct : p))
-    );
-
     try {
+      // Optimistically update the UI to reflect the change
+      const updatedProduct = { ...product, isActive: !product.isActive };
+      setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
+
+      // Then, make the API request
       const token = localStorage.getItem('token');
-      const endpoint = newStatus === 'active' ? 'activate' : 'archive';
+      const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
@@ -103,24 +102,22 @@ const AdminDashboard = () => {
 
       const data = await response.json();
 
+      // Check if the request was successful, if not, revert the change
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update');
+        throw new Error('Failed to update product availability');
       }
 
-      triggerSuccess(newStatus === 'active' ? 'Product activated successfully!' : 'Product disabled successfully!');
+      // Trigger success message
+      triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
     } catch (error) {
-      console.error('Toggle failed:', error);
-
-      // Revert the change
-      setProducts(prev =>
-        prev.map(p => (p._id === product._id ? product : p))
-      );
-
+      console.error('Error toggling availability:', error);
+      // If there was an error, revert the UI change
       triggerError('Failed to update product availability');
     }
   };
 
   const fetchOrders = async () => {
+    console.log('Fetching orders...');
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/all-orders`, {
@@ -128,18 +125,22 @@ const AdminDashboard = () => {
       });
 
       const data = await response.json();
+      console.log('Full response:', data); // Check the full response
 
       if (!response.ok) {
         throw new Error('Failed to fetch orders');
       }
 
+      // Now access the Orders array correctly:
       if (data.Orders && Array.isArray(data.Orders)) {
-        setOrders(data.Orders);
+        console.log('Fetched Orders:', data.Orders); // Log orders for verification
+        setOrders(data.Orders); // Set orders to the state
       } else {
-        setOrders([]);
+        console.error('Unknown orders response format:', data);
+        setOrders([]); // Fallback in case of unexpected format
       }
 
-      setShowOrdersModal(true);
+      setShowOrdersModal(true); // Show the modal after orders are fetched
     } catch (error) {
       console.error('Error fetching orders:', error);
       triggerError('Failed to fetch orders!');
@@ -155,7 +156,7 @@ const AdminDashboard = () => {
         <Toast
           show={showSuccess}
           onClose={() => setShowSuccess(false)}
-          bg={toastType === 'success' ? 'secondary' : 'danger'}
+          bg={toastType === 'success' ? 'secondary' : 'danger'}  // 'secondary' is gray and 'danger' is red
           delay={1500}
           autohide
         >
@@ -165,6 +166,8 @@ const AdminDashboard = () => {
           <Toast.Body className="text-white">{successMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
+
+
 
       <div className="d-flex justify-content-center mb-4">
         <Button variant="primary" className="me-2" onClick={() => setShowAddModal(true)}>Add New Product</Button>
@@ -186,30 +189,27 @@ const AdminDashboard = () => {
             {products.length > 0 ? (
               products.map(product => (
                 <tr key={product._id}>
-                  <td>{product.name}</td>
-                  <td style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <td style={{ wordBreak: 'break-word' }}>{product.name}</td>
+                  <td style={{ wordBreak: 'break-word', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {product.description}
                   </td>
-                  <td>₱{parseFloat(product.price).toFixed(2)}</td>
-                  <td>{product.status === 'active' ? 'Available' : 'Unavailable'}</td>
+                  <td>₱{product.price.toFixed(2)}</td>
+                  <td>{product.isActive ? 'Available' : 'Unavailable'}</td>
                   <td className="text-center">
                     <div className="d-inline-flex justify-content-center align-items-center gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setShowEditModal(true);
-                        }}
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        onClick={() => { setSelectedProduct(product); setShowEditModal(true); }}
                       >
                         Edit
                       </Button>
                       <Button
-                        variant={product.status === 'active' ? 'danger' : 'success'}
+                        variant={product.isActive ? "danger" : "success"}
                         size="sm"
                         onClick={() => toggleAvailability(product)}
                       >
-                        {product.status === 'active' ? 'Disable' : 'Activate'}
+                        {product.isActive ? 'Disable' : 'Activate'}
                       </Button>
                     </div>
                   </td>
@@ -252,6 +252,7 @@ const AdminDashboard = () => {
           >
             Add Product
           </Button>
+
         </Modal.Footer>
       </Modal>
 
@@ -290,6 +291,7 @@ const AdminDashboard = () => {
                 <p><strong>Order ID:</strong> {order._id}</p>
                 <p><strong>Total Price:</strong> ₱{order.totalPrice}</p>
                 <p><strong>Status:</strong> {order.status}</p>
+                {/* Optionally loop over order.products if available */}
                 <hr />
               </div>
             ))
