@@ -60,7 +60,7 @@ function App() {
         unsetUser();
       });
     }
-  }, [user]);
+  }, []);
 
   return (
     <UserProvider value={{ user, setUser, unsetUser }}>
