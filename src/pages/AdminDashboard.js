@@ -40,18 +40,33 @@ const AdminDashboard = () => {
 
 
   const fetchProducts = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setProducts(data);
-    } catch (error) {
-      console.error('Error adding product:', error);
-      triggerError('Failed to add product!');
-    }
-  };
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/all`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    setProducts(data);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    triggerError('Failed to fetch products!');
+  }
+};
+
+  const fetchActiveProducts = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/active`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    console.log('Fetched active products:', data);  // Log the products to check the response
+    setProducts(data);
+  } catch (error) {
+    console.error('Error fetching active products:', error);
+    triggerError('Failed to fetch active products!');
+  }
+};
 
   const handleAddProduct = async () => {
     try {
@@ -87,34 +102,32 @@ const AdminDashboard = () => {
   };
 
   const toggleAvailability = async (product) => {
-    try {
-      // Optimistically update the UI to reflect the change
-      const updatedProduct = { ...product, isActive: !product.isActive };
-      setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
+  try {
+    // Optimistically update the UI
+    const updatedProduct = { ...product, isActive: !product.isActive };
+    setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
 
-      // Then, make the API request
-      const token = localStorage.getItem('token');
-      const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    // Send the API request
+    const token = localStorage.getItem('token');
+    const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      const data = await response.json();
-
-      // Check if the request was successful, if not, revert the change
-      if (!response.ok) {
-        throw new Error('Failed to update product availability');
-      }
-
-      // Trigger success message
-      triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
-    } catch (error) {
-      console.error('Error toggling availability:', error);
-      // If there was an error, revert the UI change
-      triggerError('Failed to update product availability');
+    if (!response.ok) {
+      throw new Error('Failed to update product availability');
     }
-  };
+
+    const data = await response.json();
+    // If the update was successful, show success
+    triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
+  } catch (error) {
+    // Revert the UI change if there's an error
+    console.error('Error toggling availability:', error);
+    triggerError('Failed to update product availability');
+  }
+};
 
   const fetchOrders = async () => {
     console.log('Fetching orders...');
