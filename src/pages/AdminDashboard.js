@@ -107,20 +107,22 @@ const AdminDashboard = () => {
     const updatedProduct = { ...product, isActive: !product.isActive };
     setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
 
-    // Send the API request
+    // Send the API request to toggle availability
     const token = localStorage.getItem('token');
-    const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
+    const endpoint = updatedProduct.isActive ? 'activate' : 'archive';
     const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
       method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
       throw new Error('Failed to update product availability');
     }
 
-    const data = await response.json();
-    // If the update was successful, show success
+    // After toggling, re-fetch all products to ensure the database state is reflected
+    fetchProducts();  // This will get the latest product list from the server
+
+    // Show success message
     triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
   } catch (error) {
     // Revert the UI change if there's an error
