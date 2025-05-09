@@ -88,11 +88,9 @@ const AdminDashboard = () => {
 
   const toggleAvailability = async (product) => {
     try {
-      // Optimistically update the UI to reflect the change
       const updatedProduct = { ...product, isActive: !product.isActive };
       setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
 
-      // Then, make the API request
       const token = localStorage.getItem('token');
       const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
@@ -100,18 +98,15 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const data = await response.json();
-
-      // Check if the request was successful, if not, revert the change
       if (!response.ok) {
         throw new Error('Failed to update product availability');
       }
 
-      // Trigger success message
+      fetchProducts();
+
       triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
     } catch (error) {
       console.error('Error toggling availability:', error);
-      // If there was an error, revert the UI change
       triggerError('Failed to update product availability');
     }
   };
