@@ -94,7 +94,7 @@ const AdminDashboard = () => {
 
     // Then, make the API request to update the availability
     const token = localStorage.getItem('token');
-    const endpoint = updatedProduct.isActive ? 'archive' : 'activate';
+    const endpoint = product.isActive ? 'archive' : 'activate';
     const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` }
