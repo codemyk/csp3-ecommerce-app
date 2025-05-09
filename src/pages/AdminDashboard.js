@@ -88,32 +88,37 @@ const AdminDashboard = () => {
 
   const toggleAvailability = async (product) => {
   try {
-    // Optimistically update the UI to reflect the change
-    const updatedProduct = { ...product, isActive: !product.isActive };
-    setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
+    const newStatus = !product.isActive;
+    const updatedProduct = { ...product, isActive: newStatus };
 
-    // Then, make the API request to update the availability
+    // 1. Optimistic UI update
+    setProducts(products.map(p => p._id === product._id ? updatedProduct : p));
+    console.log(`Setting UI to ${newStatus ? 'Available' : 'Unavailable'}`);
+
+    // 2. Call API
     const token = localStorage.getItem('token');
     const endpoint = product.isActive ? 'archive' : 'activate';
+    console.log(`Calling endpoint: /products/${product._id}/${endpoint}`);
+
     const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${product._id}/${endpoint}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    // Check if the request was successful
+    const data = await response.json();
+    console.log('Response from server:', data);
+
     if (!response.ok) {
-      throw new Error('Failed to update product availability');
+      throw new Error(data.message || 'Failed to update');
     }
 
-    // Trigger success message
-    triggerSuccess(updatedProduct.isActive ? 'Product activated successfully!' : 'Product disabled successfully!');
-
-    // Refetch the products after the successful update
-    fetchProducts(); // Make sure to refetch the products after the update
+    // 3. Show success and reload data
+    triggerSuccess(newStatus ? 'Product activated successfully!' : 'Product disabled successfully!');
+    fetchProducts();
   } catch (error) {
-    console.error('Error toggling availability:', error);
-    // If there was an error, revert the UI change
+    console.error('Toggle error:', error);
     triggerError('Failed to update product availability');
+    fetchProducts(); // Revert UI if failure
   }
 };
 
